@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  background: #fefce8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(74, 222, 128, 0.16), transparent 28rem),
+    radial-gradient(circle at 90% 20%, rgba(146, 64, 14, 0.1), transparent 22rem),
+    #fefce8;
+  color: #1a3c2e;
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+.bg-leaf-texture {
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(74, 222, 128, 0.22) 0 2px, transparent 3px),
+    radial-gradient(circle at 80% 40%, rgba(26, 60, 46, 0.12) 0 1px, transparent 2px),
+    radial-gradient(circle at 50% 80%, rgba(146, 64, 14, 0.1) 0 2px, transparent 3px);
+  background-size: 34px 34px, 28px 28px, 42px 42px;
+}
+
+.plant-stem {
+  stroke-dasharray: 620;
+  stroke-dashoffset: 620;
+  animation: grow-stem 4s ease forwards;
+}
+
+.float-leaf {
+  animation: float-leaf 7s ease-in-out infinite;
+}
+
+@keyframes grow-stem {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes float-leaf {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-18px) rotate(5deg); }
+}
