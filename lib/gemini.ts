@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, Part } from "@google/generative-ai";
+import { Part } from "@google/generative-ai";
 
 const defaultModelName = "gemini-1.5-flash";
 
@@ -8,21 +8,27 @@ function apiKey() {
   return key;
 }
 
-export function geminiModel() {
-  const modelName = process.env.GEMINI_MODEL || defaultModelName;
-  return new GoogleGenerativeAI(apiKey()).getGenerativeModel({
-    model: modelName,
-    generationConfig: { temperature: 0.25, topP: 0.9, responseMimeType: "application/json" }
-  });
-}
-
-export function geminiEmbeddingModel() {
-  return new GoogleGenerativeAI(apiKey()).getGenerativeModel({ model: "embedding-001" });
-}
-
 export async function generateGeminiJson<T>(prompt: string, parts: Part[] = []): Promise<T> {
-  const result = await geminiModel().generateContent([{ text: prompt }, ...parts]);
-  const text = result.response.text();
+  const modelName = process.env.GEMINI_MODEL || defaultModelName;
+  const url = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${apiKey()}`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }, ...parts] }],
+      generationConfig: { temperature: 0.25, topP: 0.9, responseMimeType: "application/json" }
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Gemini API error (${response.status}): ${errorText}`);
+  }
+
+  const result = await response.json();
+  const text = result.candidates[0].content.parts[0].text;
+
   try {
     return JSON.parse(text) as T;
   } catch {
