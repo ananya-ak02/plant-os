@@ -1,6 +1,6 @@
 import { Part } from "@google/generative-ai";
 
-const defaultModelName = "gemini-1.5-flash";
+const defaultModelName = "gemini-flash-latest";
 
 function apiKey() {
   const key = process.env.GEMINI_API_KEY;
@@ -10,7 +10,7 @@ function apiKey() {
 
 export async function generateGeminiJson<T>(prompt: string, parts: Part[] = []): Promise<T> {
   const primaryModel = process.env.GEMINI_MODEL || defaultModelName;
-  const fallbackModels = [primaryModel, "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.0-pro", "gemini-pro"];
+  const fallbackModels = [primaryModel, "gemini-flash-latest", "gemini-2.5-flash", "gemini-2.0-flash-lite"];
   
   let lastErrorText = "";
   let response;
