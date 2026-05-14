@@ -17,7 +17,7 @@ export async function generateGeminiJson<T>(prompt: string, parts: Part[] = []):
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }, ...parts] }],
-      generationConfig: { temperature: 0.25, topP: 0.9, responseMimeType: "application/json" }
+      generationConfig: { temperature: 0.25, topP: 0.9 }
     })
   });
 
