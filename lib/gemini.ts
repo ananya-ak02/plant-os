@@ -9,21 +9,34 @@ function apiKey() {
 }
 
 export async function generateGeminiJson<T>(prompt: string, parts: Part[] = []): Promise<T> {
-  const modelName = process.env.GEMINI_MODEL || defaultModelName;
-  const url = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${apiKey()}`;
+  const primaryModel = process.env.GEMINI_MODEL || defaultModelName;
+  const fallbackModels = [primaryModel, "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.0-pro", "gemini-pro"];
+  
+  let lastErrorText = "";
+  let response;
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }, ...parts] }],
-      generationConfig: { temperature: 0.25, topP: 0.9 }
-    })
-  });
+  for (const model of fallbackModels) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey()}`;
+    
+    response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }, ...parts] }],
+        generationConfig: { temperature: 0.25, topP: 0.9 }
+      })
+    });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Gemini API error (${response.status}): ${errorText}`);
+    if (response.ok) {
+      break; // Successfully got a response!
+    } else {
+      lastErrorText = await response.text();
+      console.warn(`Model ${model} failed, trying next...`);
+    }
+  }
+
+  if (!response || !response.ok) {
+    throw new Error(`All Gemini models failed. Last error: ${lastErrorText}`);
   }
 
   const result = await response.json();
